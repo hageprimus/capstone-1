@@ -7,6 +7,15 @@ public class Transaction {
     private String vendor;
     private double amount;
 
+    //Empty constructor
+    public Transaction() {
+        this.date = LocalDate.EPOCH;
+        this.time = LocalTime.MIDNIGHT;
+        this.description = "";
+        this.vendor = "";
+        this.amount = 0;
+    }
+
     //Constructor that accepts literals
     public Transaction(LocalDate date, LocalTime time, String description, String vendor, double amount) {
         this.date = date;
@@ -68,5 +77,9 @@ public class Transaction {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public boolean isDebit() {
+        return amount > 0;
     }
 }
