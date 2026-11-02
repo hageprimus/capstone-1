@@ -76,8 +76,8 @@ public class LedgerApp {
                         switch (command) {
                             case 1 -> menuState = MENU.LEDGER;
                             case 2 -> menuState = MENU.REPORT;
-                            case 3 -> addTransactionToLedger(createTransactionFromConsole(false, s), ledger);
-                            case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger);
+                            case 3 -> addTransactionToLedger(createTransactionFromConsole(false, s), ledger, "");
+                            case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger, "");
                             case 5 -> {
                                 System.out.println("Reloaded ledger.");
                                 ledger = populateLedger(true);
@@ -137,17 +137,17 @@ public class LedgerApp {
      * Add the given transaction to the internal ledger list, as well as updating the given file.
      * TODO: add json functionality, user defined file?
      */
-    private static void addTransactionToLedger(Transaction newT, List<Transaction> ledger) throws IOException {
+    private static void addTransactionToLedger(Transaction newT, List<Transaction> ledger, String newOutput) throws IOException {
         ledger.add(newT);
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/ledger.csv", true));
+            String output = !newOutput.isBlank() ? newOutput : "src/main/resources/ledger.csv";
+            BufferedWriter writer = new BufferedWriter(new FileWriter(output, newOutput.isBlank()));
             writer.write(newT.outputToCsv());
             writer.close();
         } catch (IOException e) {
-            System.out.println("LedgerApp file not found!");
+            System.out.println("Ledger file not found!");
             e.printStackTrace();
         }
-        //TODO: unfinished, add error catching
     }
 
     /**
