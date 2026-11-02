@@ -1,5 +1,4 @@
 package com.pluralsight;
-
 import java.io.*;
 import java.util.*;
 import java.time.*;
@@ -119,6 +118,10 @@ public class Ledger {
         LocalTime time = LocalTime.parse(timeInput);
         String description = getInputFromConsole("Enter a short description of the transaction: ", s, false);
         String vendor = getInputFromConsole("Enter the name of the vendor the transaction was conducted with: ", s, false);
+        String amountInput = getInputFromConsole("Enter the amount of money transferred in the transaction: ", s, false);
+        double amount = Double.parseDouble(amountInput);
+        Transaction newT = new Transaction(date, time, description, vendor, amount);
+        ledger.add(newT);
         //TODO: unfinished, add error catching
     }
 
