@@ -1,5 +1,9 @@
 package com.pluralsight;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -61,6 +65,7 @@ public class LedgerApp {
     public static void main(String[] args) throws IOException {
         //Populate ledger
         List<Transaction> ledger = populateLedger(true);
+        List<Transaction> test = jsonTest();
 
         //Initialize important menu variables
         MENU menuState = MENU.MAIN;
@@ -369,6 +374,21 @@ public class LedgerApp {
                 ledger.add(t);
             } while ((fileLine = reader.readLine()) != null);
             reader.close();
+        } catch (IOException e) {
+            System.out.println("File not found!");
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("Invalid input detected from file!");
+            e.printStackTrace();
+        }
+        return ledger;
+    }
+
+    private static List<Transaction> jsonTest() throws IOException {
+        List<Transaction> ledger = new ArrayList<>();
+        try {
+            JsonReader jsonReader = new JsonReader(new FileReader("src/main/resources/ledger.json"));
+
         } catch (IOException e) {
             System.out.println("File not found!");
             e.printStackTrace();
