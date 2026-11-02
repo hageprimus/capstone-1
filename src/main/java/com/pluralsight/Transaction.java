@@ -84,4 +84,17 @@ public class Transaction {
     public boolean isDebit() {
         return amount > 0;
     }
+
+    public String reportInfo() {
+        String format = """
+                Deposit or debit? %s
+                Date: %s
+                Time: %s
+                Description: %s
+                Vendor: %s
+                Amount: $%+,.2f
+                """;
+        String debitIndicator = isDebit() ? "Debit" : "Deposit";
+        return String.format(format, debitIndicator, date.toString(), time.toString(), description, vendor, amount);
+    }
 }

@@ -46,7 +46,7 @@ public class Ledger {
     //MAIN
     public static void main(String[] args) throws IOException {
         //Populate ledger
-        List<Transaction> ledger = populateLedger();
+        List<Transaction> ledger = populateLedger(true);
 
         //Initialize important menu variables
         MENU menuState = MENU.MAIN;
@@ -83,8 +83,9 @@ public class Ledger {
                         command = Integer.parseInt(userInput);
                         switch (command) {
                             case 1 -> menuState = MENU.REPORT;
-                            case 2 -> displayTransactions(false, ledger);
-                            case 3 -> displayTransactions(true, ledger);
+                            case 2 -> displayTransactions(0, ledger);
+                            case 3 -> displayTransactions(1, ledger);
+                            case 4 -> displayTransactions(-1, ledger);
                             default -> menuState = MENU.MAIN;
                         }
                     } catch (Exception e) {
@@ -125,14 +126,19 @@ public class Ledger {
         //TODO: unfinished, add error catching
     }
 
-    private static void displayTransactions(boolean isDebit, List<Transaction> ledger) {
+    private static void displayTransactions(int displayArg, List<Transaction> ledger) {
+        for (Transaction t: ledger) {
+            if (displayArg == 0 || (displayArg * t.getAmount()) > 0)
+                System.out.println(t.reportInfo());
+        }
     }
 
     //Populate the ledger from the given .csv file
-    private static List<Transaction> populateLedger() {
+    private static List<Transaction> populateLedger(boolean skip1st) {
         List<Transaction> ledger = new ArrayList<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/ledger.csv"));
+            if (skip1st) reader.readLine(); //skip header line if flagged
             String fileLine = reader.readLine();
             do {
                 String[] tokens = fileLine.split("\\|");
