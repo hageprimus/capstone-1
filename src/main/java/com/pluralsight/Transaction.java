@@ -1,5 +1,4 @@
 package com.pluralsight;
-
 import java.time.*;
 
 public class Transaction {
@@ -8,6 +7,11 @@ public class Transaction {
     private String description;
     private String vendor;
     private double amount;
+
+    //Formatting
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_RESET = "\u001B[0m";
 
     //Empty constructor
     public Transaction() {
@@ -82,21 +86,12 @@ public class Transaction {
     }
 
     public boolean isDebit() {
-        return amount > 0;
+        return amount < 0;
     }
 
     public String reportInfo() {
-        String format = """
-                Deposit or debit? %s
-                Date: %s
-                Time: %s
-                Description: %s
-                Vendor: %s
-                Amount: $%+,.2f
-                
-                """;
-        String debitIndicator = isDebit() ? "Debit" : "Deposit";
-        return String.format(format, debitIndicator, date.toString(), time.toString(), description, vendor, amount);
+        String format = "%10s|%8s|%50s|%35s|$%,8.2f";
+        return (isDebit() ? ANSI_RED : ANSI_GREEN) + String.format(format, date.toString(), time.toString(), description, vendor, amount) + ANSI_RESET;
         //TODO: color code output, organize output in table style?
     }
 

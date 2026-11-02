@@ -165,11 +165,11 @@ public class Ledger {
             if (displayArg * t.getAmount() >= 0)
                 results.add(t);
         }
+        ledger.sort(Comparator.comparing(Transaction::getDate));
         printListOfTransactions(results);
     }
     private static void displayTransactions(LocalDate startDate, LocalDate endDate, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
-        ledger.sort(Comparator.comparing(Transaction::getDate));
         for (Transaction t : ledger) {
             if ((t.getDate().isAfter(startDate) || t.getDate().isEqual(startDate)) && (t.getDate().isBefore(endDate) || t.getDate().isEqual(endDate)))
                 results.add(t);
@@ -183,6 +183,7 @@ public class Ledger {
             if (t.getVendor().equals(vendorName))
                 results.add(t);
         }
+        ledger.sort(Comparator.comparing(Transaction::getDate));
         printListOfTransactions(results);
     }
 
@@ -210,14 +211,19 @@ public class Ledger {
         for (Transaction t : ledger) {
             boolean[] match = new boolean[4];
             Arrays.fill(match, false);
+            ledger.sort(Comparator.comparing(Transaction::getDate));
             if ((startDate == LocalDate.EPOCH && endDate == LocalDate.EPOCH) || ((t.getDate().isAfter(startDate) || t.getDate().isEqual(startDate)) && (t.getDate().isBefore(endDate) || t.getDate().isEqual(endDate))))
                 match[0] = true;
+            ledger.sort(Comparator.comparing(Transaction::getDescription));
             if (description.isBlank() || t.getDescription().equalsIgnoreCase(description))
                 match[1] = true;
+            ledger.sort(Comparator.comparing(Transaction::getVendor));
             if (vendor.isBlank() || t.getVendor().equalsIgnoreCase(vendor))
                 match[2] = true;
+            ledger.sort(Comparator.comparing(Transaction::getAmount));
             if ((range[0] == 0 && range[range.length-1] == 0) || (t.getAmount() >= range[0] && t.getAmount() <= range[range.length-1]))
                 match[3] = true;
+            ledger.sort(Comparator.comparing(Transaction::getDate));
 
             int matchCount = 0;
             for (boolean m : match)
@@ -281,6 +287,7 @@ public class Ledger {
     }
 
     private static void printListOfTransactions(List<Transaction> print) {
+        System.out.printf("%10s|%8s|%50s|%35s|%8s\n", "Date", "Time", "Description", "Vendor", "Amount");
         for (Transaction t : print)
             System.out.println(t.reportInfo());
     }
