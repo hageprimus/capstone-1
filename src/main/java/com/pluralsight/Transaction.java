@@ -96,7 +96,7 @@ public class Transaction {
     }
 
     public String outputToCsv() {
-        String format = "%s|%s|%s|%s|%.2f";
+        String format = "\n%s|%s|%s|%s|%.2f";
         return String.format(format, date.toString(), time.toString(), description, vendor, amount);
     }
 }

@@ -2,7 +2,8 @@ package com.pluralsight;
 import java.io.*;
 import java.util.*;
 import java.time.*;
-public class Ledger {
+
+public class LedgerApp {
     private enum MENU {
         MAIN,
         LEDGER,
@@ -17,6 +18,7 @@ public class Ledger {
             2 - Open the report menu
             3 - Add a deposit to the ledger
             4 - Add a debit to the ledger
+            5 - Reload data from the ledger file
             0 - EXIT
             """;
 
@@ -59,8 +61,8 @@ public class Ledger {
 
         //Initialize important menu variables
         MENU menuState = MENU.MAIN;
-        String userInput = "";
-        int command =  0;
+        String userInput;
+        int command;
         boolean exitFlag = false;
 
         //Program loop
@@ -76,6 +78,10 @@ public class Ledger {
                             case 2 -> menuState = MENU.REPORT;
                             case 3 -> addTransactionToLedger(createTransactionFromConsole(false, s), ledger);
                             case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger);
+                            case 5 -> {
+                                System.out.println("Reloaded ledger.");
+                                ledger = populateLedger(true);
+                            }
                             default -> {
                                 System.out.println("Closing application.");
                                 exitFlag = true;
@@ -133,24 +139,72 @@ public class Ledger {
      */
     private static void addTransactionToLedger(Transaction newT, List<Transaction> ledger) throws IOException {
         ledger.add(newT);
-        BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/ledger.csv", true));
-        System.out.println(newT.outputToCsv());
-        writer.write(newT.outputToCsv());
-        writer.close();
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/ledger.csv", true));
+            writer.write(newT.outputToCsv());
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("LedgerApp file not found!");
+            e.printStackTrace();
+        }
         //TODO: unfinished, add error catching
     }
 
+    /**
+     * Creates a new transaction based on user input.
+     * Will prompt the user to confirm their input and re-enter the information if they deem it is incorrect for any reason.
+     */
     private static Transaction createTransactionFromConsole(boolean isDebit, Scanner s) {
-        String dateInput = getInputFromConsole("Enter the date of the transaction (YYYY-MM-DD): ", s, false);
-        LocalDate date = LocalDate.parse(dateInput);
-        String timeInput = getInputFromConsole("Enter the time of the transaction (HH:MM): ", s, false);
-        LocalTime time = LocalTime.parse(timeInput);
-        String description = getInputFromConsole("Enter a short description of the transaction: ", s, false);
-        String vendor = getInputFromConsole("Enter the name of the vendor the transaction was conducted with: ", s, false);
-        String amountInput = getInputFromConsole("Enter the amount of money transferred in the transaction: ", s, false);
-        double amount = Double.parseDouble(amountInput) * (isDebit ? -1 : 1);
-        return new Transaction(date, time, description, vendor, amount);
-        //TODO: unfinished, add error catching, account for user input variability
+        //Starting variables
+        boolean complete = false;
+        Transaction newT = new Transaction();
+        String confirm = """
+                Has the transaction above been entered correctly?
+                Press Y to confirm. Press N to re-enter the information.
+                """;
+
+        //Get transaction
+        do {
+            String dateInput = getInputFromConsole("Enter the date of the transaction (YYYY-MM-DD): ", s, false);
+            LocalDate date = LocalDate.EPOCH;
+            try {
+                date = LocalDate.parse(dateInput);
+            } catch (Exception e) {
+                System.out.println("Invalid date input received! Defaulting date value.");
+                e.printStackTrace();
+            }
+            String timeInput = getInputFromConsole("Enter the time of the transaction (HH:MM): ", s, false);
+            LocalTime time = LocalTime.MIDNIGHT;
+            try {
+                time = LocalTime.parse(timeInput).withSecond((int)(Math.random() * 100));
+            } catch (Exception e) {
+                System.out.println("Invalid time input received! Defaulting time value.");
+                e.printStackTrace();
+            }
+            String description = getInputFromConsole("Enter a short description of the transaction: ", s, false);
+            String vendor = getInputFromConsole("Enter the name of the vendor the transaction was conducted with: ", s, false);
+            String amountInput = getInputFromConsole("Enter the amount of money transferred in the transaction: ", s, false);
+            double amount = 0;
+            try {
+                amount = Double.parseDouble(amountInput) * (isDebit ? -1 : 1);
+            } catch (Exception e) {
+                System.out.println("Invalid value input received! Defaulting value to $0.");
+                e.printStackTrace();
+            }
+
+            //Assign values to new transaction object
+            newT.setDate(date);
+            newT.setTime(time);
+            newT.setDescription(description);
+            newT.setVendor(vendor);
+            newT.setAmount(amount);
+
+            //Confirm with user if we can proceed
+            System.out.println(newT.reportInfo());
+            String userConfirm = getInputFromConsole(confirm, s, false);
+            complete = userConfirm.equalsIgnoreCase("y");
+        } while (!complete);
+        return newT;
     }
 
     /**

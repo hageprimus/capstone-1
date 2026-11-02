@@ -1,3 +1,3 @@
-# com.pluralsight.Transaction com.pluralsight.Ledger Application
+# Transaction Ledger Application
 
 TBD
