@@ -179,7 +179,8 @@ public class LedgerApp {
             String timeInput = getInputFromConsole("Enter the time of the transaction (HH:MM): ", s, false);
             LocalTime time = LocalTime.MIDNIGHT;
             try {
-                time = LocalTime.parse(timeInput).withSecond((int)(Math.random() * 100));
+                //Assign the current second value to any time the user inputs to keep the data neat
+                time = LocalTime.parse(timeInput).withSecond(LocalTime.now().getSecond());
             } catch (Exception e) {
                 System.out.println("Invalid time input received! Defaulting time value.");
                 e.printStackTrace();
