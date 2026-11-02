@@ -49,6 +49,9 @@ public class Ledger {
     private static final LocalDate FIRST_OF_THIS_YEAR = LocalDate.of(LocalDate.now().getYear(), Month.JANUARY, 1);
     private static final LocalDate FIRST_OF_LAST_YEAR = LocalDate.of(LocalDate.now().getYear()-1, Month.JANUARY, 1);
 
+    //Define constant for how many user-search parameters there are
+    private static final int SEARCH_PARAMETERS = 5;
+
     //MAIN
     public static void main(String[] args) throws IOException {
         //Populate ledger
@@ -184,12 +187,90 @@ public class Ledger {
         }
     }
 
-    private static void searchTransactions(List<String> userSearch, List<Transaction> ledger) {
+    private static void searchTransactions(String[] userSearch, List<Transaction> ledger) {
+        //Define lists of indexes
+        List<Integer> dateMatch = new ArrayList<>();
+        List<Integer> descMatch = new ArrayList<>();
+        List<Integer> vendMatch = new ArrayList<>();
+        List<Integer> amntMatch = new ArrayList<>();
+
         //Set search flags based on what the user inputted
+        boolean[] searchFlags = new boolean[SEARCH_PARAMETERS];
+        Arrays.fill(searchFlags, false);
+        for (var i = 0; i < SEARCH_PARAMETERS; i++) {
+            if (!userSearch[i].isBlank()) {
+                searchFlags[i] = true;
+            }
+        }
+
+        //Search each parameter individually and store the indices of matches
+        for (var i = 0; i < SEARCH_PARAMETERS; i++) {
+            switch (i) {
+                case 0, 1 -> {
+                    if (searchFlags[i]) {
+                        ledger.sort(Comparator.comparing(Transaction::getDate));
+                        LocalDate startDate = !userSearch[0].isBlank() ? LocalDate.parse(userSearch[0]) : ledger.get(0).getDate();
+                        LocalDate endDate = !userSearch[1].isBlank() ? LocalDate.parse(userSearch[1]) : LocalDate.now();
+                        for (var j = 0; j < ledger.size(); j++) {
+                            Transaction t = ledger.get(j);
+                            if ((t.getDate().isAfter(startDate) || t.getDate().isEqual(startDate)) && (t.getDate().isBefore(endDate) || t.getDate().isEqual(endDate)))
+                                dateMatch.add(j);
+                        }
+                    }
+                }
+                case 2 -> {
+                    if (searchFlags[i]) {
+                        ledger.sort(Comparator.comparing(Transaction::getDescription));
+                        for (var j = 0; j < ledger.size(); j++) {
+                            Transaction t = ledger.get(j);
+                            if (t.getDescription().equals(userSearch[i]))
+                                descMatch.add(j);
+                        }
+                    }
+                }
+                case 3 -> {
+                    if (searchFlags[i]) {
+                        ledger.sort(Comparator.comparing(Transaction::getVendor));
+                        for (var j = 0; j < ledger.size(); j++) {
+                            Transaction t = ledger.get(j);
+                            if (t.getVendor().equals(userSearch[i]))
+                                vendMatch.add(j);
+                        }
+                    }
+                }
+                case 4 -> {
+                    if (searchFlags[i]) {
+                        ledger.sort(Comparator.comparing(Transaction::getAmount));
+                        String[] splitInput = userSearch[i].trim().split("-");
+                        if (splitInput.length > 1) {
+                            double[] range = new double[splitInput.length];
+                            for (var j = 0; j < splitInput.length; j++) {
+                                range[j] = Double.parseDouble(splitInput[j]);
+                            }
+                            Arrays.sort(range);
+                            for (var x = 0; x < ledger.size(); x++) {
+                                Transaction t = ledger.get(x);
+                                if (t.getAmount() >= range[0] && t.getAmount() <= range[1])
+                                    amntMatch.add(x);
+                            }
+                        } else {
+                            double exactAmount = Double.parseDouble(splitInput[0]);
+                            for (var j = 0; j < ledger.size(); j++) {
+                                Transaction t = ledger.get(j);
+                                if (t.getAmount() == exactAmount)
+                                    amntMatch.add(j);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Iterate through the original list again, and create a new list of transactions that match in every necessary field
+        }
     }
 
-    private static List<String> userDefinedSearch(List<Transaction> ledger, Scanner s) {
-        List<String> output = new ArrayList<>();
+    private static String[] userDefinedSearch(List<Transaction> ledger, Scanner s) {
+        String[] output = new String[SEARCH_PARAMETERS];
         String startDatePrompt =
                 """
                 Enter the start date of the range to search for.
@@ -198,7 +279,7 @@ public class Ledger {
                 the oldest transaction will be used as the start date.
                 """;
         String startDateInput = getInputFromConsole(startDatePrompt, s, false);
-        output.add(startDateInput);
+        output[0] = startDateInput;
         String endDatePrompt =
                 """
                 Enter the start date of the range to search for.
@@ -207,7 +288,7 @@ public class Ledger {
                 the current date will be used as the end date.
                 """;
         String endDateInput = getInputFromConsole(endDatePrompt, s, false);
-        output.add(endDateInput);
+        output[1] = endDateInput;
         String descriptionPrompt =
                 """
                 Enter the description field of the transaction you are searching for.
@@ -216,7 +297,7 @@ public class Ledger {
                 The input does not need to be case-sensitive.
                 """;
         String descriptionInput = getInputFromConsole(descriptionPrompt, s, false);
-        output.add(descriptionInput);
+        output[2] = descriptionInput;
         String vendorPrompt =
                 """
                 Enter the vendor field of the transaction you are searching for.
@@ -225,7 +306,7 @@ public class Ledger {
                 The input does not need to be case-sensitive.
                 """;
         String vendorInput = getInputFromConsole(vendorPrompt, s, false);
-        output.add(vendorInput);
+        output[3] = vendorInput;
         String amountPrompt =
                 """
                 Enter the actual value of the transaction you are searching for.
@@ -233,7 +314,7 @@ public class Ledger {
                 Press ENTER to leave this field blank.
                 """;
         String amountInput = getInputFromConsole(amountPrompt, s, false);
-        output.add(amountInput);
+        output[4] = amountInput;
         return output;
     }
 
