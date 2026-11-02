@@ -1,7 +1,10 @@
 package com.pluralsight;
+
 import java.io.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Month;
 import java.util.*;
-import java.time.*;
 
 public class LedgerApp {
     private enum MENU {
@@ -344,7 +347,7 @@ public class LedgerApp {
      * Prints a given list of transactions in a neat, color coded format.
      */
     private static void printListOfTransactions(List<Transaction> print) {
-        System.out.printf("%10s|%8s|%50s|%35s|%11s\n", "Date", "Time", "Description", "Vendor", "Amount");
+        System.out.printf("%10s|%8s|%50s|%35s|%11s\n", "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
         for (Transaction t : print)
             System.out.println(t.outputToConsole());
     }
