@@ -1,3 +1,5 @@
+package com.pluralsight;
+
 import java.time.*;
 
 public class Transaction {
@@ -34,7 +36,7 @@ public class Transaction {
             this.vendor = vendor;
             this.amount = Double.parseDouble(amount);
         } catch (Exception e) {
-            System.out.println("Invalid string passed to Transaction constructor.");
+            System.out.println("Invalid string passed to com.pluralsight.Transaction constructor.");
             e.printStackTrace();
         }
     }

@@ -1,3 +1,5 @@
+package com.pluralsight;
+
 import java.io.*;
 import java.util.*;
 import java.time.*;
@@ -117,17 +119,10 @@ public class Ledger {
         LocalTime time = LocalTime.parse(timeInput);
         String description = getInputFromConsole("Enter a short description of the transaction: ", s, false);
         String vendor = getInputFromConsole("Enter the name of the vendor the transaction was conducted with: ", s, false);
-        //TODO: unfinished
+        //TODO: unfinished, add error catching
     }
 
     private static void displayTransactions(boolean isDebit, List<Transaction> ledger) {
-    }
-
-    //General input retrieval method
-    private static String getInputFromConsole(String display, Scanner s, boolean clearBuffer) {
-        if (clearBuffer) s.nextLine();
-        System.out.println(display);
-        return s.nextLine().trim();
     }
 
     //Populate the ledger from the given .csv file
@@ -150,5 +145,12 @@ public class Ledger {
             e.printStackTrace();
         }
         return ledger;
+    }
+
+    //General input retrieval method
+    private static String getInputFromConsole(String display, Scanner s, boolean clearBuffer) {
+        if (clearBuffer) s.nextLine();
+        System.out.println(display);
+        return s.nextLine().trim();
     }
 }
