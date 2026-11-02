@@ -89,14 +89,21 @@ public class Transaction {
         return amount < 0;
     }
 
-    public String reportInfo() {
+    //Treats transaction data for output to the console
+    public String outputToConsole() {
         String format = "%10s|%8s|%50s|%35s|$%,8.2f";
         return (isDebit() ? ANSI_RED : ANSI_GREEN) + String.format(format, date.toString(), time.toString(), description, vendor, amount) + ANSI_RESET;
-        //TODO: color code output, organize output in table style?
     }
 
+    //Treats transaction data for output to a .csv file
     public String outputToCsv() {
         String format = "\n%s|%s|%s|%s|%.2f";
         return String.format(format, date.toString(), time.toString(), description, vendor, amount);
+    }
+
+    //Treats transaction data for output to a .json file
+    public String outputToJson() {
+        return "";
+        //TODO: add JSON functionality here
     }
 }

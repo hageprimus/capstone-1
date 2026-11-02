@@ -135,7 +135,7 @@ public class LedgerApp {
 
     /**
      * Add the given transaction to the internal ledger list, as well as updating the given file.
-     * TODO: add json functionality, user defined file?
+     * TODO: add JSON functionality, user defined file?
      */
     private static void addTransactionToLedger(Transaction newT, List<Transaction> ledger, String newOutput) throws IOException {
         ledger.add(newT);
@@ -200,7 +200,7 @@ public class LedgerApp {
             newT.setAmount(amount);
 
             //Confirm with user if we can proceed
-            System.out.println(newT.reportInfo());
+            System.out.println(newT.outputToConsole());
             String userConfirm = getInputFromConsole(confirm, s, false);
             complete = userConfirm.equalsIgnoreCase("y");
         } while (!complete);
@@ -279,6 +279,7 @@ public class LedgerApp {
                 match[3] = true;
             ledger.sort(Comparator.comparing(Transaction::getDate));
 
+            //Add any transaction objects that fully match to the results output
             int matchCount = 0;
             for (boolean m : match)
                 if (m) matchCount++;
@@ -339,16 +340,18 @@ public class LedgerApp {
         output[4] = amountInput;
         return output;
     }
-
+    /**
+     * Prints a given list of transactions in a neat, color coded format.
+     */
     private static void printListOfTransactions(List<Transaction> print) {
-        System.out.printf("%10s|%8s|%50s|%35s|%8s\n", "Date", "Time", "Description", "Vendor", "Amount");
+        System.out.printf("%10s|%8s|%50s|%35s|%11s\n", "Date", "Time", "Description", "Vendor", "Amount");
         for (Transaction t : print)
-            System.out.println(t.reportInfo());
+            System.out.println(t.outputToConsole());
     }
 
     /**
      * Populate the ledger from the given .csv file.
-     * TODO: add user defined file functionality, .json parsing?
+     * TODO: add user defined file functionality, JSON parsing?
      */
     private static List<Transaction> populateLedger(boolean skip1st) throws IOException {
         List<Transaction> ledger = new ArrayList<>();
