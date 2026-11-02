@@ -109,9 +109,8 @@ public class Ledger {
                             case 3 -> displayTransactions(FIRST_OF_LAST_MONTH, FIRST_OF_THIS_MONTH.minusDays(1), ledger);
                             case 4 -> displayTransactions(FIRST_OF_THIS_YEAR, LocalDate.now(), ledger);
                             case 5 -> displayTransactions(FIRST_OF_LAST_YEAR, FIRST_OF_THIS_YEAR.minusDays(1), ledger);
-                            case 6 -> {
-                                displayTransactions(getInputFromConsole("Enter the name of the vendor to search for: ", s, false), ledger);
-                            }
+                            case 6 -> displayTransactions(getInputFromConsole("Enter the name of the vendor to search for: ", s, false), ledger);
+                            case 7 -> searchTransactions(userDefinedSearch(ledger, s), ledger);
                             default -> menuState = MENU.MAIN;
                         }
                     } catch (Exception e) {
@@ -162,7 +161,6 @@ public class Ledger {
                 System.out.println(t.reportInfo());
         }
     }
-
     private static void displayTransactions(LocalDate startDate, LocalDate endDate, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
         ledger.sort(Comparator.comparing(Transaction::getDate));
@@ -174,7 +172,6 @@ public class Ledger {
             System.out.println(t.reportInfo());
         }
     }
-
     private static void displayTransactions(String vendorName, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
         ledger.sort(Comparator.comparing(Transaction::getVendor));
@@ -187,11 +184,64 @@ public class Ledger {
         }
     }
 
+    private static void searchTransactions(List<String> userSearch, List<Transaction> ledger) {
+        //Set search flags based on what the user inputted
+    }
+
+    private static List<String> userDefinedSearch(List<Transaction> ledger, Scanner s) {
+        List<String> output = new ArrayList<>();
+        String startDatePrompt =
+                """
+                Enter the start date of the range to search for.
+                Press ENTER to leave this field blank.
+                If an end date is entered with this field blank,
+                the oldest transaction will be used as the start date.
+                """;
+        String startDateInput = getInputFromConsole(startDatePrompt, s, false);
+        output.add(startDateInput);
+        String endDatePrompt =
+                """
+                Enter the start date of the range to search for.
+                Press ENTER to leave this field blank.
+                If an start date is entered with this field blank,
+                the current date will be used as the end date.
+                """;
+        String endDateInput = getInputFromConsole(endDatePrompt, s, false);
+        output.add(endDateInput);
+        String descriptionPrompt =
+                """
+                Enter the description field of the transaction you are searching for.
+                Press ENTER to leave this field blank.
+                The actual description entered must EXACTLY match the text of the one in the database!
+                The input does not need to be case-sensitive.
+                """;
+        String descriptionInput = getInputFromConsole(descriptionPrompt, s, false);
+        output.add(descriptionInput);
+        String vendorPrompt =
+                """
+                Enter the vendor field of the transaction you are searching for.
+                Press ENTER to leave this field blank.
+                The actual vendor name entered must EXACTLY match the text of the one in the database!
+                The input does not need to be case-sensitive.
+                """;
+        String vendorInput = getInputFromConsole(vendorPrompt, s, false);
+        output.add(vendorInput);
+        String amountPrompt =
+                """
+                Enter the actual value of the transaction you are searching for.
+                You can define a range to search for by inputting 2 values in the format [LOW - HIGH}.
+                Press ENTER to leave this field blank.
+                """;
+        String amountInput = getInputFromConsole(amountPrompt, s, false);
+        output.add(amountInput);
+        return output;
+    }
+
     /**
      * Populate the ledger from the given .csv file.
      * TODO: add user defined file functionality, .json parsing?
      */
-    private static List<Transaction> populateLedger(boolean skip1st) {
+    private static List<Transaction> populateLedger(boolean skip1st) throws IOException {
         List<Transaction> ledger = new ArrayList<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/ledger.csv"));
