@@ -93,8 +93,15 @@ public class Transaction {
                 Description: %s
                 Vendor: %s
                 Amount: $%+,.2f
+                
                 """;
         String debitIndicator = isDebit() ? "Debit" : "Deposit";
         return String.format(format, debitIndicator, date.toString(), time.toString(), description, vendor, amount);
+        //TODO: color code output, organize output in table style?
+    }
+
+    public String outputToCsv() {
+        String format = "%s|%s|%s|%s|%.2f";
+        return String.format(format, date.toString(), time.toString(), description, vendor, amount);
     }
 }

@@ -43,6 +43,12 @@ public class Ledger {
             0 - RETURN TO MAIN MENU
             """;
 
+    //Define useful date constants
+    private static final LocalDate FIRST_OF_THIS_MONTH = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
+    private static final LocalDate FIRST_OF_LAST_MONTH = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonthValue()-1, 1);
+    private static final LocalDate FIRST_OF_THIS_YEAR = LocalDate.of(LocalDate.now().getYear(), Month.JANUARY, 1);
+    private static final LocalDate FIRST_OF_LAST_YEAR = LocalDate.of(LocalDate.now().getYear()-1, Month.JANUARY, 1);
+
     //MAIN
     public static void main(String[] args) throws IOException {
         //Populate ledger
@@ -65,8 +71,8 @@ public class Ledger {
                         switch (command) {
                             case 1 -> menuState = MENU.LEDGER;
                             case 2 -> menuState = MENU.REPORT;
-                            case 3 -> addTransaction(false, ledger, s);
-                            case 4 -> addTransaction(true, ledger, s);
+                            case 3 -> addTransactionToLedger(createTransactionFromConsole(false, s), ledger);
+                            case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger);
                             default -> {
                                 System.out.println("Closing application.");
                                 exitFlag = true;
@@ -99,6 +105,13 @@ public class Ledger {
                         command = Integer.parseInt(userInput);
                         switch (command) {
                             case 1 -> menuState = MENU.LEDGER;
+                            case 2 -> displayTransactions(FIRST_OF_THIS_MONTH, LocalDate.now(), ledger);
+                            case 3 -> displayTransactions(FIRST_OF_LAST_MONTH, FIRST_OF_THIS_MONTH.minusDays(1), ledger);
+                            case 4 -> displayTransactions(FIRST_OF_THIS_YEAR, LocalDate.now(), ledger);
+                            case 5 -> displayTransactions(FIRST_OF_LAST_YEAR, FIRST_OF_THIS_YEAR.minusDays(1), ledger);
+                            case 6 -> {
+                                displayTransactions(getInputFromConsole("Enter the name of the vendor to search for: ", s, false), ledger);
+                            }
                             default -> menuState = MENU.MAIN;
                         }
                     } catch (Exception e) {
@@ -112,7 +125,20 @@ public class Ledger {
         s.close();
     }
 
-    private static void addTransaction(boolean isDebit, List<Transaction> ledger, Scanner s) {
+    /**
+     * Add the given transaction to the internal ledger list, as well as updating the given file.
+     * TODO: add json functionality, user defined file?
+     */
+    private static void addTransactionToLedger(Transaction newT, List<Transaction> ledger) throws IOException {
+        ledger.add(newT);
+        BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/ledger.csv", true));
+        System.out.println(newT.outputToCsv());
+        writer.write(newT.outputToCsv());
+        writer.close();
+        //TODO: unfinished, add error catching
+    }
+
+    private static Transaction createTransactionFromConsole(boolean isDebit, Scanner s) {
         String dateInput = getInputFromConsole("Enter the date of the transaction (YYYY-MM-DD): ", s, false);
         LocalDate date = LocalDate.parse(dateInput);
         String timeInput = getInputFromConsole("Enter the time of the transaction (HH:MM): ", s, false);
@@ -120,20 +146,51 @@ public class Ledger {
         String description = getInputFromConsole("Enter a short description of the transaction: ", s, false);
         String vendor = getInputFromConsole("Enter the name of the vendor the transaction was conducted with: ", s, false);
         String amountInput = getInputFromConsole("Enter the amount of money transferred in the transaction: ", s, false);
-        double amount = Double.parseDouble(amountInput);
-        Transaction newT = new Transaction(date, time, description, vendor, amount);
-        ledger.add(newT);
-        //TODO: unfinished, add error catching
+        double amount = Double.parseDouble(amountInput) * (isDebit ? -1 : 1);
+        return new Transaction(date, time, description, vendor, amount);
+        //TODO: unfinished, add error catching, account for user input variability
     }
 
+    /**
+     * Display a list of transactions based on pre-defined parameters in the program.
+     * Each version of the method can display transactions based on debit vs deposit, the date,
+     * or the vendor the transaction was conducted with.
+     */
     private static void displayTransactions(int displayArg, List<Transaction> ledger) {
         for (Transaction t: ledger) {
-            if (displayArg == 0 || (displayArg * t.getAmount()) > 0)
+            if (displayArg * t.getAmount() >= 0)
                 System.out.println(t.reportInfo());
         }
     }
 
-    //Populate the ledger from the given .csv file
+    private static void displayTransactions(LocalDate startDate, LocalDate endDate, List<Transaction> ledger) {
+        List<Transaction> results = new ArrayList<>();
+        ledger.sort(Comparator.comparing(Transaction::getDate));
+        for (Transaction t : ledger) {
+            if ((t.getDate().isAfter(startDate) || t.getDate().isEqual(startDate)) && (t.getDate().isBefore(endDate) || t.getDate().isEqual(endDate)))
+                results.add(t);
+        }
+        for (Transaction t : results) {
+            System.out.println(t.reportInfo());
+        }
+    }
+
+    private static void displayTransactions(String vendorName, List<Transaction> ledger) {
+        List<Transaction> results = new ArrayList<>();
+        ledger.sort(Comparator.comparing(Transaction::getVendor));
+        for (Transaction t : ledger) {
+            if (t.getVendor().equals(vendorName))
+                results.add(t);
+        }
+        for (Transaction t : results) {
+            System.out.println(t.reportInfo());
+        }
+    }
+
+    /**
+     * Populate the ledger from the given .csv file.
+     * TODO: add user defined file functionality, .json parsing?
+     */
     private static List<Transaction> populateLedger(boolean skip1st) {
         List<Transaction> ledger = new ArrayList<>();
         try {
@@ -156,7 +213,9 @@ public class Ledger {
         return ledger;
     }
 
-    //General input retrieval method
+    /**
+     * General input retrieval method
+     */
     private static String getInputFromConsole(String display, Scanner s, boolean clearBuffer) {
         if (clearBuffer) s.nextLine();
         System.out.println(display);
