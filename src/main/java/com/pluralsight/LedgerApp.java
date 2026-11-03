@@ -64,8 +64,7 @@ public class LedgerApp {
     //MAIN
     public static void main(String[] args) throws IOException {
         //Populate ledger
-        List<Transaction> ledger = populateLedger(true);
-        List<Transaction> test = jsonTest();
+        List<Transaction> ledger = populateLedger(".json");
 
         //Initialize important menu variables
         MENU menuState = MENU.MAIN;
@@ -362,33 +361,46 @@ public class LedgerApp {
      * Populate the ledger from the given .csv file.
      * TODO: add user defined file functionality, JSON parsing?
      */
-    private static List<Transaction> populateLedger(boolean skip1st) throws IOException {
+    private static List<Transaction> populateLedger(String type) throws IOException {
         List<Transaction> ledger = new ArrayList<>();
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/ledger.csv"));
-            if (skip1st) reader.readLine(); //skip header line if flagged
-            String fileLine = reader.readLine();
-            do {
-                String[] tokens = fileLine.split("\\|");
-                Transaction t = new Transaction(tokens[0], tokens[1], tokens[2], tokens[3], tokens[4]);
-                ledger.add(t);
-            } while ((fileLine = reader.readLine()) != null);
-            reader.close();
-        } catch (IOException e) {
-            System.out.println("File not found!");
-            e.printStackTrace();
-        } catch (Exception e) {
-            System.out.println("Invalid input detected from file!");
-            e.printStackTrace();
-        }
-        return ledger;
-    }
+            switch (type) {
+                case ".csv" -> {
+                    BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/ledger.csv"));
+                    reader.readLine(); //skip header line
+                    String fileLine = reader.readLine();
+                    do {
+                        String[] tokens = fileLine.split("\\|");
+                        Transaction t = new Transaction(tokens[0], tokens[1], tokens[2], tokens[3], tokens[4]);
+                        ledger.add(t);
+                    } while ((fileLine = reader.readLine()) != null);
+                    reader.close();
+                }
+                case ".json" -> {
+                    JsonReader jsonReader = new JsonReader(new FileReader("src/main/resources/ledger.json"));
+                    jsonReader.beginArray();
+                    while (jsonReader.hasNext()) {
+                        jsonReader.beginObject();
+                        Transaction newT = new Transaction();
+                        while (jsonReader.hasNext()) {
+                            String propertyName = jsonReader.nextName();
+                            switch (propertyName) {
+                                case "localDate" -> newT.setDate(LocalDate.parse(jsonReader.nextString()));
+                                case "localTime" -> newT.setTime(LocalTime.parse(jsonReader.nextString()));
+                                case "description" -> newT.setDescription(jsonReader.nextString());
+                                case "vendor" -> newT.setVendor(jsonReader.nextString());
+                                case "amount" -> newT.setAmount(jsonReader.nextDouble());
+                                default -> jsonReader.skipValue();
+                            }
 
-    private static List<Transaction> jsonTest() throws IOException {
-        List<Transaction> ledger = new ArrayList<>();
-        try {
-            JsonReader jsonReader = new JsonReader(new FileReader("src/main/resources/ledger.json"));
-
+                        }
+                        ledger.add(newT);
+                        jsonReader.endObject();
+                    }
+                    jsonReader.endArray();
+                    jsonReader.close();
+                }
+            }
         } catch (IOException e) {
             System.out.println("File not found!");
             e.printStackTrace();
