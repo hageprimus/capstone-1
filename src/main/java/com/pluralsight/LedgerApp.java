@@ -62,12 +62,13 @@ public class LedgerApp {
     private static final int SEARCH_PARAMETERS = 5;
 
     //Define constant for changing the file format the project operates with (for testing/demo purposes)
-    private static final String FILE_FORMAT = ".json";
+    private static final String LEDGER_FILE_CSV = "src/main/resources/ledger.csv";
+    private static final String LEDGER_FILE_JSON = "src/main/resources/ledger.json";
 
     //MAIN
     public static void main(String[] args) throws IOException {
         //Populate ledger
-        List<Transaction> ledger = populateLedger(FILE_FORMAT);
+        List<Transaction> ledger = populateLedger(LEDGER_FILE_JSON);
 
         //Initialize important menu variables
         MENU menuState = MENU.MAIN;
@@ -90,7 +91,7 @@ public class LedgerApp {
                             case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger, "");
                             case 5 -> {
                                 System.out.println("Reloaded ledger.");
-                                ledger = populateLedger(FILE_FORMAT);
+                                ledger = populateLedger(LEDGER_FILE_JSON);
                             }
                             default -> {
                                 System.out.println("Closing application.");
@@ -361,15 +362,26 @@ public class LedgerApp {
     }
 
     /**
-     * Populate the ledger from the given .csv file.
-     * TODO: add user defined file functionality, JSON parsing?
+     * Populate the ledger from the given CSV or JSON file.
      */
-    private static List<Transaction> populateLedger(String type) throws IOException {
+    private static List<Transaction> populateLedger(String file) throws IOException {
         List<Transaction> ledger = new ArrayList<>();
+        //Figure out which file type we're using
+        String type = "";
+        if (file.substring(file.length() - 4).equalsIgnoreCase(".csv")) {
+            type = ".csv";
+        } else if (file.substring(file.length() - 5).equalsIgnoreCase(".json")) {
+            type = ".json";
+        } else {
+            System.out.println("Invalid file type passed to ledger! Loading provided .csv file by default.");
+            type = ".csv";
+            file = LEDGER_FILE_CSV;
+        }
+        //Parse provided file
         try {
             switch (type) {
                 case ".csv" -> {
-                    BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/ledger.csv"));
+                    BufferedReader reader = new BufferedReader(new FileReader(file));
                     reader.readLine(); //skip header line
                     String fileLine = reader.readLine();
                     do {
@@ -380,7 +392,7 @@ public class LedgerApp {
                     reader.close();
                 }
                 case ".json" -> {
-                    JsonReader jsonReader = new JsonReader(new FileReader("src/main/resources/ledger.json"));
+                    JsonReader jsonReader = new JsonReader(new FileReader(file));
                     jsonReader.beginArray();
                     while (jsonReader.hasNext()) {
                         jsonReader.beginObject();
