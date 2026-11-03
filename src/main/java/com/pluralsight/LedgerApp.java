@@ -61,10 +61,13 @@ public class LedgerApp {
     //Define constant for how many user-search parameters there are
     private static final int SEARCH_PARAMETERS = 5;
 
+    //Define constant for changing the file format the project operates with (for testing/demo purposes)
+    private static final String FILE_FORMAT = ".json";
+
     //MAIN
     public static void main(String[] args) throws IOException {
         //Populate ledger
-        List<Transaction> ledger = populateLedger(".json");
+        List<Transaction> ledger = populateLedger(FILE_FORMAT);
 
         //Initialize important menu variables
         MENU menuState = MENU.MAIN;
@@ -87,7 +90,7 @@ public class LedgerApp {
                             case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger, "");
                             case 5 -> {
                                 System.out.println("Reloaded ledger.");
-                                ledger = populateLedger(true);
+                                ledger = populateLedger(FILE_FORMAT);
                             }
                             default -> {
                                 System.out.println("Closing application.");
