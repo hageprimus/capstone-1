@@ -100,10 +100,4 @@ public class Transaction {
         String format = "\n%s|%s|%s|%s|%.2f";
         return String.format(format, date.toString(), time.toString(), description, vendor, amount);
     }
-
-    //Treats transaction data for output to a .json file
-    public String outputToJson() {
-        return "";
-        //TODO: add JSON functionality here
-    }
 }

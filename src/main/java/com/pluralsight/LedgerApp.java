@@ -87,8 +87,8 @@ public class LedgerApp {
                         switch (command) {
                             case 1 -> menuState = MENU.LEDGER;
                             case 2 -> menuState = MENU.REPORT;
-                            case 3 -> addTransactionToLedger(createTransactionFromConsole(false, s), ledger, "");
-                            case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger, "");
+                            case 3 -> addTransactionToLedger(createTransactionFromConsole(false, s), ledger, LEDGER_FILE_CSV);
+                            case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger, LEDGER_FILE_CSV);
                             case 5 -> {
                                 System.out.println("Reloaded ledger.");
                                 ledger = populateLedger(LEDGER_FILE_JSON);
@@ -148,13 +148,24 @@ public class LedgerApp {
      * Add the given transaction to the internal ledger list, as well as updating the given file.
      * TODO: add JSON functionality, user defined file?
      */
-    private static void addTransactionToLedger(Transaction newT, List<Transaction> ledger, String newOutput) throws IOException {
+    private static void addTransactionToLedger(Transaction newT, List<Transaction> ledger, String file) throws IOException {
+        String[] output = setFileType(file);
+        String type = output[0];
+        file = output[1];
+
         ledger.add(newT);
         try {
-            String output = !newOutput.isBlank() ? newOutput : "src/main/resources/ledger.csv";
-            BufferedWriter writer = new BufferedWriter(new FileWriter(output, newOutput.isBlank()));
-            writer.write(newT.outputToCsv());
-            writer.close();
+            switch (type) {
+                case ".csv" -> {
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+                    for (Transaction t : ledger)
+                        writer.write(t.outputToCsv());
+                    writer.close();
+                }
+                case ".json" -> {
+
+                }
+            }
         } catch (IOException e) {
             System.out.println("Ledger file not found!");
             e.printStackTrace();
@@ -356,7 +367,7 @@ public class LedgerApp {
      * Prints a given list of transactions in a neat, color coded format.
      */
     private static void printListOfTransactions(List<Transaction> print) {
-        System.out.printf("%10s|%8s|%50s|%35s|%11s\n", "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
+        System.out.printf("%10s|%8s|%50s|%35s|%10s\n", "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
         for (Transaction t : print)
             System.out.println(t.outputToConsole());
     }
@@ -366,17 +377,9 @@ public class LedgerApp {
      */
     private static List<Transaction> populateLedger(String file) throws IOException {
         List<Transaction> ledger = new ArrayList<>();
-        //Figure out which file type we're using
-        String type = "";
-        if (file.substring(file.length() - 4).equalsIgnoreCase(".csv")) {
-            type = ".csv";
-        } else if (file.substring(file.length() - 5).equalsIgnoreCase(".json")) {
-            type = ".json";
-        } else {
-            System.out.println("Invalid file type passed to ledger! Loading provided .csv file by default.");
-            type = ".csv";
-            file = LEDGER_FILE_CSV;
-        }
+        String[] output = setFileType(file);
+        String type = output[0];
+        file = output[1];
         //Parse provided file
         try {
             switch (type) {
@@ -384,10 +387,16 @@ public class LedgerApp {
                     BufferedReader reader = new BufferedReader(new FileReader(file));
                     reader.readLine(); //skip header line
                     String fileLine = reader.readLine();
+                    int lineCount = 1;
                     do {
                         String[] tokens = fileLine.split("\\|");
-                        Transaction t = new Transaction(tokens[0], tokens[1], tokens[2], tokens[3], tokens[4]);
-                        ledger.add(t);
+                        if (tokens.length == 5) {
+                            Transaction t = new Transaction(tokens[0], tokens[1], tokens[2], tokens[3], tokens[4]);
+                            ledger.add(t);
+                        } else {
+                            System.out.println("Line " + lineCount + "does not parse correctly! Skipping this entry.");
+                        }
+                        lineCount++;
                     } while ((fileLine = reader.readLine()) != null);
                     reader.close();
                 }
@@ -407,7 +416,6 @@ public class LedgerApp {
                                 case "amount" -> newT.setAmount(jsonReader.nextDouble());
                                 default -> jsonReader.skipValue();
                             }
-
                         }
                         ledger.add(newT);
                         jsonReader.endObject();
@@ -424,6 +432,21 @@ public class LedgerApp {
             e.printStackTrace();
         }
         return ledger;
+    }
+
+    private static String[] setFileType(String file) {
+        //Figure out which file type we're using
+        String type = "";
+        if (file.substring(file.length() - 4).equalsIgnoreCase(".csv")) {
+            type = ".csv";
+        } else if (file.substring(file.length() - 5).equalsIgnoreCase(".json")) {
+            type = ".json";
+        } else {
+            System.out.println("Invalid file type passed to ledger! Loading provided .csv file by default.");
+            type = ".csv";
+            file = LEDGER_FILE_CSV;
+        }
+        return new String[]{type, file};
     }
 
     /**
