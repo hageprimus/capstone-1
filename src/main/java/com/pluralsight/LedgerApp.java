@@ -128,9 +128,9 @@ public class LedgerApp {
                         command = Integer.parseInt(userInput);
                         switch (command) {
                             case 1 -> menuState = MENU.REPORT;
-                            case 2 -> displayTransactions(0, ledger);
-                            case 3 -> displayTransactions(1, ledger);
-                            case 4 -> displayTransactions(-1, ledger);
+                            case 2 -> displayTransactionsByAmount(0, ledger);
+                            case 3 -> displayTransactionsByAmount(1, ledger);
+                            case 4 -> displayTransactionsByAmount(-1, ledger);
                             default -> menuState = MENU.MAIN;
                         }
                     } catch (Exception e) {
@@ -144,11 +144,11 @@ public class LedgerApp {
                         command = Integer.parseInt(userInput);
                         switch (command) {
                             case 1 -> menuState = MENU.LEDGER;
-                            case 2 -> displayTransactions(FIRST_OF_THIS_MONTH, LocalDate.now(), ledger);
-                            case 3 -> displayTransactions(FIRST_OF_LAST_MONTH, FIRST_OF_THIS_MONTH.minusDays(1), ledger);
-                            case 4 -> displayTransactions(FIRST_OF_THIS_YEAR, LocalDate.now(), ledger);
-                            case 5 -> displayTransactions(FIRST_OF_LAST_YEAR, FIRST_OF_THIS_YEAR.minusDays(1), ledger);
-                            case 6 -> displayTransactions(getInputFromConsole("Enter the name of the vendor to search for: ", s, false), ledger);
+                            case 2 -> displayTransactionsByDate(FIRST_OF_THIS_MONTH, LocalDate.now(), ledger);
+                            case 3 -> displayTransactionsByDate(FIRST_OF_LAST_MONTH, FIRST_OF_THIS_MONTH.minusDays(1), ledger);
+                            case 4 -> displayTransactionsByDate(FIRST_OF_THIS_YEAR, LocalDate.now(), ledger);
+                            case 5 -> displayTransactionsByDate(FIRST_OF_LAST_YEAR, FIRST_OF_THIS_YEAR.minusDays(1), ledger);
+                            case 6 -> displayTransactionsByVendor(getInputFromConsole("Enter the name of the vendor to search for: ", s, false), ledger);
                             case 7 -> searchTransactions(userDefinedSearch(ledger, s), ledger);
                             default -> menuState = MENU.MAIN;
                         }
@@ -265,11 +265,9 @@ public class LedgerApp {
     }
 
     /**
-     * Display a list of transactions based on pre-defined parameters in the program.
-     * Each version of the method can display transactions based on debit vs deposit, the date,
-     * or the vendor the transaction was conducted with.
+     * Display a list of transactions based on if they are debits, deposits, or simply display the entire ledger.
      */
-    private static void displayTransactions(int displayArg, List<Transaction> ledger) {
+    private static void displayTransactionsByAmount(int displayArg, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
         for (Transaction t: ledger) {
             if (displayArg * t.getAmount() >= 0)
@@ -277,7 +275,11 @@ public class LedgerApp {
         }
         printListOfTransactions(results);
     }
-    private static void displayTransactions(LocalDate startDate, LocalDate endDate, List<Transaction> ledger) {
+
+    /**
+     * Display a list of transactions based on a given starting date and ending date.
+     */
+    private static void displayTransactionsByDate(LocalDate startDate, LocalDate endDate, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
         for (Transaction t : ledger) {
             if ((t.getDate().isAfter(startDate) || t.getDate().isEqual(startDate)) && (t.getDate().isBefore(endDate) || t.getDate().isEqual(endDate)))
@@ -285,7 +287,11 @@ public class LedgerApp {
         }
         printListOfTransactions(results);
     }
-    private static void displayTransactions(String vendorName, List<Transaction> ledger) {
+
+    /**
+     * Display a list of transactions attibuted to a given vendor.
+     */
+    private static void displayTransactionsByVendor(String vendorName, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
         for (Transaction t : ledger) {
             if (t.getVendor().equals(vendorName))
@@ -477,6 +483,9 @@ public class LedgerApp {
         return ledger;
     }
 
+    /**
+     * Boilerplate method for setting the file type to read
+     */
     private static String[] setFileType(String file) {
         //Figure out which file type we're using
         String type;
