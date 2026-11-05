@@ -309,13 +309,18 @@ public class LedgerApp {
         //Create results list
         List<Transaction> results = new ArrayList<>();
 
+        //The ledger is sorted newest to oldest, so the last entry should be the oldest
+        ledger.sort(Comparator.comparing(Transaction::getDate).reversed());
+        LocalDate oldestTransaction = ledger.get(ledger.size()-1).getDate();
+
+
         //Parse user input
         //DATES
         LocalDate startDate;
         LocalDate endDate;
         try {
-            startDate = !userSearch[0].isBlank() ? LocalDate.parse(userSearch[0]) : LocalDate.EPOCH;
-            endDate = !userSearch[1].isBlank() ? LocalDate.parse(userSearch[1]) : LocalDate.EPOCH;
+            startDate = !userSearch[0].isBlank() ? LocalDate.parse(userSearch[0]) : (!userSearch[1].isBlank() ? oldestTransaction : LocalDate.EPOCH);
+            endDate = !userSearch[1].isBlank() ? LocalDate.parse(userSearch[1]) : (!userSearch[0].isBlank() ? LocalDate.now() : LocalDate.EPOCH);
         } catch (DateTimeException e) {
             System.out.println("Bad date data inputted! Ignoring date field for search.");
             startDate = LocalDate.EPOCH;
