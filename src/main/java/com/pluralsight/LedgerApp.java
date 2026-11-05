@@ -1,11 +1,11 @@
 package com.pluralsight;
 
 import java.io.*;
-import java.time.DateTimeException;
 import java.util.*;
-import java.time.LocalDate;
+import java.time.*;
 import java.time.LocalTime;
 import java.time.Month;
+import java.time.DateTimeException;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
@@ -225,7 +225,7 @@ public class LedgerApp {
             LocalDate date = LocalDate.EPOCH;
             try {
                 date = LocalDate.parse(dateInput);
-            } catch (Exception e) {
+            } catch (DateTimeException e) {
                 System.out.println("Invalid date input received! Defaulting date value.");
                 if (DEBUG) e.printStackTrace();
             }
@@ -234,7 +234,7 @@ public class LedgerApp {
             try {
                 //Assign the current second value to any time the user inputs to keep the data neat
                 time = LocalTime.parse(timeInput).withSecond(LocalTime.now().getSecond());
-            } catch (Exception e) {
+            } catch (DateTimeException e) {
                 System.out.println("Invalid time input received! Defaulting time value.");
                 if (DEBUG) e.printStackTrace();
             }
@@ -333,7 +333,7 @@ public class LedgerApp {
 
         //Amount
         String amountInput = userSearch[4].replace(",", "");
-        String[] amountSplit = !amountInput.isBlank() ? amountInput.trim().split("\\|") : new String[]{"0"};
+        String[] amountSplit = !amountInput.isBlank() ? amountInput.split("\\|") : new String[]{"0"};
         double[] range = new double[amountSplit.length];
         for (var i = 0; i < amountSplit.length; i++) {
             range[i] = Double.parseDouble(amountSplit[i]);
