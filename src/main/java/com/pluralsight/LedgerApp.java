@@ -241,9 +241,10 @@ public class LedgerApp {
             String description = getInputFromConsole("Enter a short description of the transaction: ", s, false);
             String vendor = getInputFromConsole("Enter the name of the vendor the transaction was conducted with: ", s, false);
             String amountInput = getInputFromConsole("Enter the amount of money transferred in the transaction: ", s, false);
+            String amountFixed = amountInput.replace(",", "");  //Remove any commas if the user inputs them
             double amount = 0;
             try {
-                amount = Double.parseDouble(amountInput) * (isDebit ? -1 : 1);
+                amount = Double.parseDouble(amountFixed) * (isDebit ? -1 : 1);
             } catch (Exception e) {
                 System.out.println("Invalid value input received! Defaulting value to $0.");
                 if (DEBUG) e.printStackTrace();
@@ -289,7 +290,7 @@ public class LedgerApp {
     }
 
     /**
-     * Display a list of transactions attibuted to a given vendor.
+     * Display a list of transactions attributed to a given vendor.
      */
     private static void displayTransactionsByVendor(String vendorName, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
