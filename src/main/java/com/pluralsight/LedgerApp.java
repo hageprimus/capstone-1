@@ -3,6 +3,7 @@ package com.pluralsight;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -87,8 +88,8 @@ public class LedgerApp {
                         switch (command) {
                             case 1 -> menuState = MENU.LEDGER;
                             case 2 -> menuState = MENU.REPORT;
-                            case 3 -> addTransactionToLedger(createTransactionFromConsole(false, s), ledger, LEDGER_FILE_CSV);
-                            case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger, LEDGER_FILE_CSV);
+                            case 3 -> addTransactionToLedger(createTransactionFromConsole(false, s), ledger, LEDGER_FILE_JSON);
+                            case 4 -> addTransactionToLedger(createTransactionFromConsole(true, s), ledger, LEDGER_FILE_JSON);
                             case 5 -> {
                                 System.out.println("Reloaded ledger.");
                                 ledger = populateLedger(LEDGER_FILE_JSON);
@@ -146,14 +147,16 @@ public class LedgerApp {
 
     /**
      * Add the given transaction to the internal ledger list, as well as updating the given file.
-     * TODO: add JSON functionality, user defined file?
      */
     private static void addTransactionToLedger(Transaction newT, List<Transaction> ledger, String file) throws IOException {
         String[] output = setFileType(file);
         String type = output[0];
         file = output[1];
 
+        //Add new transaction to internal list
         ledger.add(newT);
+
+        //Update external file (always a full overwrite!)
         try {
             switch (type) {
                 case ".csv" -> {
@@ -163,7 +166,20 @@ public class LedgerApp {
                     writer.close();
                 }
                 case ".json" -> {
-
+                    JsonWriter jsonWriter = new JsonWriter(new FileWriter(file));
+                    jsonWriter.setIndent(" ");
+                    jsonWriter.beginArray();
+                    for (Transaction t : ledger) {
+                        jsonWriter.beginObject();
+                        jsonWriter.name("localDate").value(t.getDate().toString());
+                        jsonWriter.name("localTime").value(t.getTime().toString());
+                        jsonWriter.name("description").value(t.getDescription());
+                        jsonWriter.name("vendor").value(t.getVendor());
+                        jsonWriter.name("amount").value(t.getAmount());
+                        jsonWriter.endObject();
+                    }
+                    jsonWriter.endArray();
+                    jsonWriter.close();
                 }
             }
         } catch (IOException e) {

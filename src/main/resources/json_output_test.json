@@ -1,0 +1,177 @@
+[
+ {
+  "localDate": "2024-11-02",
+  "localTime": "08:15:22",
+  "description": "Bulk produce purchase",
+  "vendor": "FreshFields Farms",
+  "amount": -12450.75
+ },
+ {
+  "localDate": "2024-12-18",
+  "localTime": "14:42:10",
+  "description": "Member sales deposit",
+  "vendor": "Member Receipts",
+  "amount": 38210.4
+ },
+ {
+  "localDate": "2025-01-09",
+  "localTime": "09:05:33",
+  "description": "Dairy inventory restock",
+  "vendor": "Green Valley Dairy",
+  "amount": -8750.0
+ },
+ {
+  "localDate": "2025-02-21",
+  "localTime": "16:18:45",
+  "description": "Member sales deposit",
+  "vendor": "Member Receipts",
+  "amount": 41785.22
+ },
+ {
+  "localDate": "2025-03-15",
+  "localTime": "11:27:01",
+  "description": "Packaging supplies order",
+  "vendor": "PackRight Supply",
+  "amount": -3125.9
+ },
+ {
+  "localDate": "2025-04-30",
+  "localTime": "13:44:19",
+  "description": "Electronics wholesale shipment",
+  "vendor": "TechSource Distribution",
+  "amount": -22680.55
+ },
+ {
+  "localDate": "2025-05-12",
+  "localTime": "10:12:08",
+  "description": "Vendor rebate received",
+  "vendor": "TechSource Distribution",
+  "amount": 2450.0
+ },
+ {
+  "localDate": "2025-06-28",
+  "localTime": "15:55:41",
+  "description": "Frozen foods inventory",
+  "vendor": "Arctic Foods Co",
+  "amount": -15430.18
+ },
+ {
+  "localDate": "2025-07-19",
+  "localTime": "12:08:57",
+  "description": "Member sales deposit",
+  "vendor": "Member Receipts",
+  "amount": 45110.76
+ },
+ {
+  "localDate": "2025-08-03",
+  "localTime": "17:31:22",
+  "description": "Beverage stock purchase",
+  "vendor": "Blue River Beverages",
+  "amount": -10990.6
+ },
+ {
+  "localDate": "2025-09-14",
+  "localTime": "08:49:36",
+  "description": "Promotional allowance credit",
+  "vendor": "Blue River Beverages",
+  "amount": 1800.0
+ },
+ {
+  "localDate": "2025-10-26",
+  "localTime": "14:03:29",
+  "description": "Household goods replenishment",
+  "vendor": "HomeWare Wholesale",
+  "amount": -13225.44
+ },
+ {
+  "localDate": "2025-12-11",
+  "localTime": "09:58:14",
+  "description": "Member sales deposit",
+  "vendor": "Member Receipts",
+  "amount": 50220.19
+ },
+ {
+  "localDate": "2026-01-22",
+  "localTime": "11:40:52",
+  "description": "Produce inventory purchase",
+  "vendor": "FreshFields Farms",
+  "amount": -14110.83
+ },
+ {
+  "localDate": "2026-02-17",
+  "localTime": "16:22:47",
+  "description": "Dairy inventory restock",
+  "vendor": "Green Valley Dairy",
+  "amount": -9255.35
+ },
+ {
+  "localDate": "2026-03-29",
+  "localTime": "10:16:05",
+  "description": "Member sales deposit",
+  "vendor": "Member Receipts",
+  "amount": 48875.61
+ },
+ {
+  "localDate": "2026-04-18",
+  "localTime": "13:33:11",
+  "description": "Packaging supplies order",
+  "vendor": "PackRight Supply",
+  "amount": -3418.72
+ },
+ {
+  "localDate": "2026-05-27",
+  "localTime": "15:07:56",
+  "description": "Frozen foods inventory",
+  "vendor": "Arctic Foods Co",
+  "amount": -16790.4
+ },
+ {
+  "localDate": "2026-06-16",
+  "localTime": "09:25:43",
+  "description": "Vendor rebate received",
+  "vendor": "FreshFields Farms",
+  "amount": 2150.0
+ },
+ {
+  "localDate": "2026-07-24",
+  "localTime": "12:51:37",
+  "description": "Electronics wholesale shipment",
+  "vendor": "TechSource Distribution",
+  "amount": -24860.91
+ },
+ {
+  "localDate": "2026-08-20",
+  "localTime": "17:14:28",
+  "description": "Member sales deposit",
+  "vendor": "Member Receipts",
+  "amount": 53644.88
+ },
+ {
+  "localDate": "2026-09-09",
+  "localTime": "08:37:50",
+  "description": "Beverage stock purchase",
+  "vendor": "Blue River Beverages",
+  "amount": -11845.22
+ },
+ {
+  "localDate": "2026-10-15",
+  "localTime": "14:46:03",
+  "description": "Household goods replenishment",
+  "vendor": "HomeWare Wholesale",
+  "amount": -13990.77
+ },
+ {
+  "localDate": "2026-11-02",
+  "localTime": "10:05:18",
+  "description": "Member sales deposit",
+  "vendor": "Member Receipts",
+  "amount": 55980.34
+ },
+ {
+  "localDate": "2025-11-11",
+  "localTime": "21:04:29",
+  "description": "Test transaction",
+  "vendor": "Test vendor",
+  "amount": 45000.0
+ }
+]
