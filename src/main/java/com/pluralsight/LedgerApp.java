@@ -17,8 +17,25 @@ public class LedgerApp {
     }
 
     //Define menu text
+    private static final String TITLE = """
+                                         ,--,                                                      \s
+                                      ,---.'|                  ,----..             ____            \s
+                       .---.    ,---,.|   | :     ,----..     /   /   \\          ,'  , `.    ,---,.\s
+                      /. ./|  ,'  .' |:   : |    /   /   \\   /   .     :      ,-+-,.' _ |  ,'  .' |\s
+                  .--'.  ' ;,---.'   ||   ' :   |   :     : .   /   ;.  \\  ,-+-. ;   , ||,---.'   |\s
+                 /__./ \\ : ||   |   .';   ; '   .   |  ;. /.   ;   /  ` ; ,--.'|'   |  ;||   |   .'\s
+             .--'.  '   \\' .:   :  |-,'   | |__ .   ; /--` ;   |  ; \\ ; ||   |  ,', |  '::   :  |-,\s
+            /___/ \\ |    ' ':   |  ;/||   | :.'|;   | ;    |   :  | ; | '|   | /  | |  ||:   |  ;/|\s
+            ;   \\  \\;      :|   :   .''   :    ;|   : |    .   |  ' ' ' :'   | :  | :  |,|   :   .'\s
+             \\   ;  `      ||   |  |-,|   |  ./ .   | '___ '   ;  \\; /  |;   . |  ; |--' |   |  |-,\s
+              .   \\    .\\  ;'   :  ;/|;   : ;   '   ; : .'| \\   \\  ',  / |   : |  | ,    '   :  ;/|\s
+               \\   \\   ' \\ ||   |    \\|   ,/    '   | '/  :  ;   :    /  |   : '  |/     |   |    \\\s
+                :   '  |--" |   :   .''---'     |   :    /    \\   \\ .'   ;   | |`-'      |   :   .'\s
+                 \\   \\ ;    |   | ,'             \\   \\ .'      `---`     |   ;/          |   | ,'  \s
+                  '---"     `----'                `---`                  '---'           `----'    \s
+    """;
+
     private static final String MAIN_MENU = """
-            Welcome to the ledger application!
             Perform any action below by inputting the corresponding key.
             1 - Open the ledger menu
             2 - Open the report menu
@@ -64,6 +81,9 @@ public class LedgerApp {
     private static final String LEDGER_FILE_CSV = "src/main/resources/ledger.csv";
     private static final String LEDGER_FILE_JSON = "src/main/resources/ledger.json";
 
+    //Define constant for printing stack traces
+    private static final boolean DEBUG = false;
+
     //MAIN
     public static void main(String[] args) throws IOException {
         //Populate ledger
@@ -80,7 +100,7 @@ public class LedgerApp {
         do {
             switch (menuState) {
                 case MAIN -> {
-                    userInput = getInputFromConsole(MAIN_MENU, s, false);
+                    userInput = getInputFromConsole(TITLE + MAIN_MENU, s, false);
                     try {
                         command = Integer.parseInt(userInput);
                         switch (command) {
@@ -99,7 +119,7 @@ public class LedgerApp {
                         }
                     } catch (Exception e) {
                         System.out.println("Invalid menu input. Please enter a valid option.");
-                        e.printStackTrace();
+                        if (DEBUG) e.printStackTrace();
                     }
                 }
                 case LEDGER -> {
@@ -115,7 +135,7 @@ public class LedgerApp {
                         }
                     } catch (Exception e) {
                         System.out.println("Invalid menu input. Please enter a valid option.");
-                        e.printStackTrace();
+                        if (DEBUG) e.printStackTrace();
                     }
                 }
                 case REPORT -> {
@@ -134,7 +154,7 @@ public class LedgerApp {
                         }
                     } catch (Exception e) {
                         System.out.println("Invalid menu input. Please enter a valid option.");
-                        e.printStackTrace();
+                        if (DEBUG) e.printStackTrace();
                     }
                 }
             }
@@ -182,7 +202,7 @@ public class LedgerApp {
             }
         } catch (IOException e) {
             System.out.println("Ledger file not found!");
-            e.printStackTrace();
+            if (DEBUG) e.printStackTrace();
         }
     }
 
@@ -207,7 +227,7 @@ public class LedgerApp {
                 date = LocalDate.parse(dateInput);
             } catch (Exception e) {
                 System.out.println("Invalid date input received! Defaulting date value.");
-                e.printStackTrace();
+                if (DEBUG) e.printStackTrace();
             }
             String timeInput = getInputFromConsole("Enter the time of the transaction (HH:MM): ", s, false);
             LocalTime time = LocalTime.MIDNIGHT;
@@ -216,7 +236,7 @@ public class LedgerApp {
                 time = LocalTime.parse(timeInput).withSecond(LocalTime.now().getSecond());
             } catch (Exception e) {
                 System.out.println("Invalid time input received! Defaulting time value.");
-                e.printStackTrace();
+                if (DEBUG) e.printStackTrace();
             }
             String description = getInputFromConsole("Enter a short description of the transaction: ", s, false);
             String vendor = getInputFromConsole("Enter the name of the vendor the transaction was conducted with: ", s, false);
@@ -226,7 +246,7 @@ public class LedgerApp {
                 amount = Double.parseDouble(amountInput) * (isDebit ? -1 : 1);
             } catch (Exception e) {
                 System.out.println("Invalid value input received! Defaulting value to $0.");
-                e.printStackTrace();
+                if (DEBUG) e.printStackTrace();
             }
 
             //Assign values to new transaction object
@@ -445,10 +465,10 @@ public class LedgerApp {
             }
         } catch (IOException e) {
             System.out.println("File not found!");
-            e.printStackTrace();
+            if (DEBUG) e.printStackTrace();
         } catch (Exception e) {
             System.out.println("Invalid input detected from file!");
-            e.printStackTrace();
+            if (DEBUG) e.printStackTrace();
         }
         //Sort all data by date newest to oldest
         ledger.sort(Comparator.comparing(Transaction::getDate).reversed());
