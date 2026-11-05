@@ -1,6 +1,7 @@
 package com.pluralsight;
 
 import java.io.*;
+import java.time.DateTimeException;
 import java.util.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -250,12 +251,10 @@ public class LedgerApp {
      */
     private static void displayTransactions(int displayArg, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
-        ledger.sort(Comparator.comparing(Transaction::getAmount));
         for (Transaction t: ledger) {
             if (displayArg * t.getAmount() >= 0)
                 results.add(t);
         }
-        ledger.sort(Comparator.comparing(Transaction::getDate));
         printListOfTransactions(results);
     }
     private static void displayTransactions(LocalDate startDate, LocalDate endDate, List<Transaction> ledger) {
@@ -268,12 +267,10 @@ public class LedgerApp {
     }
     private static void displayTransactions(String vendorName, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
-        ledger.sort(Comparator.comparing(Transaction::getVendor));
         for (Transaction t : ledger) {
             if (t.getVendor().equals(vendorName))
                 results.add(t);
         }
-        ledger.sort(Comparator.comparing(Transaction::getDate));
         printListOfTransactions(results);
     }
 
@@ -286,11 +283,25 @@ public class LedgerApp {
         List<Transaction> results = new ArrayList<>();
 
         //Parse user input
-        LocalDate startDate = !userSearch[0].isBlank() ? LocalDate.parse(userSearch[0]) : LocalDate.EPOCH;
-        LocalDate endDate = !userSearch[1].isBlank() ? LocalDate.parse(userSearch[1]) : LocalDate.EPOCH;
+        //DATES
+        LocalDate startDate;
+        LocalDate endDate;
+        try {
+            startDate = !userSearch[0].isBlank() ? LocalDate.parse(userSearch[0]) : LocalDate.EPOCH;
+            endDate = !userSearch[1].isBlank() ? LocalDate.parse(userSearch[1]) : LocalDate.EPOCH;
+        } catch (DateTimeException e) {
+            System.out.println("Bad date data inputted! Ignoring date field for search.");
+            startDate = LocalDate.EPOCH;
+            endDate = LocalDate.EPOCH;
+        }
+
+        //Description & vendor
         String description = userSearch[2];
         String vendor = userSearch[3];
-        String[] amountSplit = !userSearch[4].isBlank() ? userSearch[4].trim().split("\\|") : new String[]{"0"};
+
+        //Amount
+        String amountInput = userSearch[4].replace(",", "");
+        String[] amountSplit = !amountInput.isBlank() ? amountInput.trim().split("\\|") : new String[]{"0"};
         double[] range = new double[amountSplit.length];
         for (var i = 0; i < amountSplit.length; i++) {
             range[i] = Double.parseDouble(amountSplit[i]);
@@ -301,19 +312,14 @@ public class LedgerApp {
         for (Transaction t : ledger) {
             boolean[] match = new boolean[4];
             Arrays.fill(match, false);
-            ledger.sort(Comparator.comparing(Transaction::getDate));
             if ((startDate == LocalDate.EPOCH && endDate == LocalDate.EPOCH) || ((t.getDate().isAfter(startDate) || t.getDate().isEqual(startDate)) && (t.getDate().isBefore(endDate) || t.getDate().isEqual(endDate))))
                 match[0] = true;
-            ledger.sort(Comparator.comparing(Transaction::getDescription));
-            if (description.isBlank() || t.getDescription().equalsIgnoreCase(description))
+            if (description.isBlank() || t.getDescription().contains(description))
                 match[1] = true;
-            ledger.sort(Comparator.comparing(Transaction::getVendor));
-            if (vendor.isBlank() || t.getVendor().equalsIgnoreCase(vendor))
+            if (vendor.isBlank() || t.getVendor().contains(vendor))
                 match[2] = true;
-            ledger.sort(Comparator.comparing(Transaction::getAmount));
             if ((range[0] == 0 && range[range.length-1] == 0) || (t.getAmount() >= range[0] && t.getAmount() <= range[range.length-1]))
                 match[3] = true;
-            ledger.sort(Comparator.comparing(Transaction::getDate));
 
             //Add any transaction objects that fully match to the results output
             int matchCount = 0;
@@ -333,6 +339,7 @@ public class LedgerApp {
         String startDatePrompt =
                 """
                 Enter the start date of the range to search for.
+                Use format YYYY-MM-DD.
                 Press ENTER to leave this field blank.
                 If an end date is entered with this field blank,
                 the oldest transaction will be used as the start date.
@@ -342,6 +349,7 @@ public class LedgerApp {
         String endDatePrompt =
                 """
                 Enter the end date of the range to search for.
+                Use format YYYY-MM-DD.
                 Press ENTER to leave this field blank.
                 If an start date is entered with this field blank,
                 the current date will be used as the end date.
@@ -352,7 +360,6 @@ public class LedgerApp {
                 """
                 Enter the description field of the transaction you are searching for.
                 Press ENTER to leave this field blank.
-                The actual description entered must EXACTLY match the text of the one in the database!
                 The input does not need to be case-sensitive.
                 """;
         String descriptionInput = getInputFromConsole(descriptionPrompt, s, false);
@@ -361,7 +368,6 @@ public class LedgerApp {
                 """
                 Enter the vendor field of the transaction you are searching for.
                 Press ENTER to leave this field blank.
-                The actual vendor name entered must EXACTLY match the text of the one in the database!
                 The input does not need to be case-sensitive.
                 """;
         String vendorInput = getInputFromConsole(vendorPrompt, s, false);
@@ -444,12 +450,16 @@ public class LedgerApp {
             System.out.println("Invalid input detected from file!");
             e.printStackTrace();
         }
+        //Sort all data by date newest to oldest
+        ledger.sort(Comparator.comparing(Transaction::getDate).reversed());
+
+        //Return
         return ledger;
     }
 
     private static String[] setFileType(String file) {
         //Figure out which file type we're using
-        String type = "";
+        String type;
         if (file.substring(file.length() - 4).equalsIgnoreCase(".csv")) {
             type = ".csv";
         } else if (file.substring(file.length() - 5).equalsIgnoreCase(".json")) {
