@@ -185,8 +185,8 @@ public class LedgerApp {
                 }
                 case ".json" -> {
                     JsonWriter jsonWriter = new JsonWriter(new FileWriter(file));
-                    jsonWriter.setIndent(" ");
                     jsonWriter.beginArray();
+                    jsonWriter.setIndent(" ");
                     for (Transaction t : ledger) {
                         jsonWriter.beginObject();
                         jsonWriter.name("localDate").value(t.getDate().toString());
@@ -313,7 +313,6 @@ public class LedgerApp {
         ledger.sort(Comparator.comparing(Transaction::getDate).reversed());
         LocalDate oldestTransaction = ledger.get(ledger.size()-1).getDate();
 
-
         //Parse user input
         //DATES
         LocalDate startDate;
@@ -392,7 +391,7 @@ public class LedgerApp {
                 """
                 Enter the description field of the transaction you are searching for.
                 Press ENTER to leave this field blank.
-                The input does not need to be case-sensitive.
+                 The input should be case-sensitive.
                 """;
         String descriptionInput = getInputFromConsole(descriptionPrompt, s, false);
         output[2] = descriptionInput;
@@ -400,7 +399,7 @@ public class LedgerApp {
                 """
                 Enter the vendor field of the transaction you are searching for.
                 Press ENTER to leave this field blank.
-                The input does not need to be case-sensitive.
+                The input should be case-sensitive.
                 """;
         String vendorInput = getInputFromConsole(vendorPrompt, s, false);
         output[3] = vendorInput;
