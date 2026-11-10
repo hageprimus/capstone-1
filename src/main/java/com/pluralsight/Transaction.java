@@ -41,7 +41,7 @@ public class Transaction {
             this.vendor = vendor;
             this.amount = Double.parseDouble(amount);
         } catch (Exception e) {
-            System.out.println("Invalid string passed to com.pluralsight.Transaction constructor.");
+            System.out.println("Invalid string passed to Transaction constructor.");
             e.printStackTrace();
         }
     }

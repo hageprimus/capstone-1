@@ -6,6 +6,8 @@ import java.time.*;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.DateTimeException;
+import java.util.function.Predicate;
+
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
@@ -128,9 +130,9 @@ public class LedgerApp {
                         command = Integer.parseInt(userInput);
                         switch (command) {
                             case 1 -> menuState = MENU.REPORT;
-                            case 2 -> displayTransactionsByAmount(0, ledger);
-                            case 3 -> displayTransactionsByAmount(1, ledger);
-                            case 4 -> displayTransactionsByAmount(-1, ledger);
+                            case 2 -> displayTransactions(t -> true, ledger);
+                            case 3 -> displayTransactions(t -> t.getAmount() > 0, ledger);
+                            case 4 -> displayTransactions(t -> t.getAmount() < 0, ledger);
                             default -> menuState = MENU.MAIN;
                         }
                     } catch (Exception e) {
@@ -144,11 +146,14 @@ public class LedgerApp {
                         command = Integer.parseInt(userInput);
                         switch (command) {
                             case 1 -> menuState = MENU.LEDGER;
-                            case 2 -> displayTransactionsByDate(FIRST_OF_THIS_MONTH, LocalDate.now(), ledger);
-                            case 3 -> displayTransactionsByDate(FIRST_OF_LAST_MONTH, FIRST_OF_THIS_MONTH.minusDays(1), ledger);
-                            case 4 -> displayTransactionsByDate(FIRST_OF_THIS_YEAR, LocalDate.now(), ledger);
-                            case 5 -> displayTransactionsByDate(FIRST_OF_LAST_YEAR, FIRST_OF_THIS_YEAR.minusDays(1), ledger);
-                            case 6 -> displayTransactionsByVendor(getInputFromConsole("Enter the name of the vendor to search for: ", s, false), ledger);
+                            case 2 -> displayTransactions(t -> searchDateRange(FIRST_OF_THIS_MONTH, LocalDate.now(), t), ledger);
+                            case 3 -> displayTransactions(t -> searchDateRange(FIRST_OF_LAST_MONTH, FIRST_OF_THIS_MONTH.minusDays(1), t), ledger);
+                            case 4 -> displayTransactions(t -> searchDateRange(FIRST_OF_THIS_YEAR, LocalDate.now(), t), ledger);
+                            case 5 -> displayTransactions(t -> searchDateRange(FIRST_OF_LAST_YEAR, FIRST_OF_THIS_YEAR.minusDays(1), t), ledger);
+                            case 6 -> {
+                                var vendor = getInputFromConsole("Enter the name of the vendor to search for: ", s, false);
+                                displayTransactions(t -> t.getVendor().equalsIgnoreCase(vendor), ledger);
+                            }
                             case 7 -> searchTransactions(userDefinedSearch(ledger, s), ledger);
                             default -> menuState = MENU.MAIN;
                         }
@@ -266,39 +271,25 @@ public class LedgerApp {
     }
 
     /**
-     * Display a list of transactions based on if they are debits, deposits, or simply display the entire ledger.
+     * Accepts a condition to test against and a list of transactions to search
+     * the list and display all transactions that match the parameters defined.
+     * @param tester Anonymous method implementation of the boolean parameter to test against.
+     * @param ledger The list of transactions to search.
      */
-    private static void displayTransactionsByAmount(int displayArg, List<Transaction> ledger) {
+    private static void displayTransactions(Predicate<Transaction> tester, List<Transaction> ledger) {
         List<Transaction> results = new ArrayList<>();
         for (Transaction t: ledger) {
-            if (displayArg * t.getAmount() >= 0)
+            if (tester.test(t))
                 results.add(t);
         }
         printListOfTransactions(results);
     }
 
     /**
-     * Display a list of transactions based on a given starting date and ending date.
+     * Static method for searching date ranges since it would be very ugly in the menu tree otherwise.
      */
-    private static void displayTransactionsByDate(LocalDate startDate, LocalDate endDate, List<Transaction> ledger) {
-        List<Transaction> results = new ArrayList<>();
-        for (Transaction t : ledger) {
-            if ((t.getDate().isAfter(startDate) || t.getDate().isEqual(startDate)) && (t.getDate().isBefore(endDate) || t.getDate().isEqual(endDate)))
-                results.add(t);
-        }
-        printListOfTransactions(results);
-    }
-
-    /**
-     * Display a list of transactions attributed to a given vendor.
-     */
-    private static void displayTransactionsByVendor(String vendorName, List<Transaction> ledger) {
-        List<Transaction> results = new ArrayList<>();
-        for (Transaction t : ledger) {
-            if (t.getVendor().equals(vendorName))
-                results.add(t);
-        }
-        printListOfTransactions(results);
+    private static boolean searchDateRange(LocalDate startDate, LocalDate endDate, Transaction t) {
+        return ((t.getDate().isAfter(startDate) || t.getDate().isEqual(startDate)) && (t.getDate().isBefore(endDate) || t.getDate().isEqual(endDate)));
     }
 
     /**
@@ -324,6 +315,7 @@ public class LedgerApp {
             System.out.println("Bad date data inputted! Ignoring date field for search.");
             startDate = LocalDate.EPOCH;
             endDate = LocalDate.EPOCH;
+            if (DEBUG) e.printStackTrace();
         }
 
         //Description & vendor
